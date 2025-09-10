@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {FaChartLine, FaBeer, FaTrash, FaEdit, FaTable, FaUserPlus,} from "react-icons/fa";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import api from "../services/api";
-import Modal from "../components/ui/Modal";
+          import {
+            FaChartLine, FaBeer, FaTrash, FaEdit, FaTable, FaUserPlus,
+          } from "react-icons/fa";
+          import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+          import { useForm } from "react-hook-form";
+          import api from "../services/api";
+          import Modal from "../components/ui/Modal";
 
           const Sales = () => {
             const queryClient = useQueryClient();
             const [isAddOpen, setIsAddOpen] = useState(false);
             const { register, handleSubmit, reset } = useForm();
             const [orderItems, setOrderItems] = useState([{ item: "", qty: 1, unitPrice: 0 }]);
+
             useEffect(() => {
               document.title = "POS | Sales";
             }, []);
@@ -24,21 +27,25 @@ import Modal from "../components/ui/Modal";
               queryFn: () => api.get("/inventory").then((res) => res.data),
             });
 
-        const addMutation = useMutation({mutationFn: (data) => {console.log("API POST /sales/transactions", data); // Debug log
-            return api.post("/sales/transactions", data);},
-          onSuccess: (res) => {
-            console.log("Mutation success:", res); // Debug log
-            queryClient.invalidateQueries(["sales"]);
+        const addMutation = useMutation({
+          mutationFn: (data) => api.post("/sales/transactions", data),
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["sales"] });
             reset();
             setOrderItems([{ item: "", qty: 1, unitPrice: 0 }]);
-            setIsAddOpen(false);},
+            setIsAddOpen(false);
+          },
           onError: (error) => {
-            console.error("Mutation error:", error); // Debug log
-            alert("Failed to save transaction: " + (error?.response?.data?.message || error.message));},});
+            alert("Failed to save transaction: " + (error?.response?.data?.message || error.message));
+          },
+        });
 
         const deleteMutation = useMutation({
           mutationFn: (id) => api.delete(`/sales/transactions/${id}`),
-          onSuccess: () => queryClient.invalidateQueries(["sales"]),}); // FIXED: use array syntax 
+          onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }), // FIXED
+        });
+
+
             const handleDelete = (id) => {
               if (window.confirm("Delete this transaction?")) {
                 deleteMutation.mutate(id);
@@ -72,28 +79,15 @@ import Modal from "../components/ui/Modal";
             );
 
             const handleAddOrder = (data) => {
-              // Debug: Log form data and order items
-              console.log("Form Data:", data);
-              console.log("Order Items:", orderItems);
-
               if (!isOrderValid) {
                 alert("Please fill all order item fields (item, quantity, unit price).");
                 return;
               }
-              if (!data.name || !data.phone || !data.tableId || !data.chairs || !data.payment) {
-                alert("Please fill all customer, table, and payment fields.");
-                return;
-              }
-              if (orderItems.length === 0) {
-                alert("Please add at least one order item.");
-                return;
-              }
-
               const now = new Date();
               const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
               const day = now.toLocaleDateString("en-US", { weekday: "short" });
 
-              const payload = {
+              addMutation.mutate({
                 ...data,
                 orders: orderItems,
                 total,
@@ -101,12 +95,7 @@ import Modal from "../components/ui/Modal";
                 status: "Occupied",
                 time,
                 day,
-              };
-
-              // Debug: Log payload before mutation
-              console.log("Submitting payload:", payload);
-
-              addMutation.mutate(payload);
+              });
             };
 
             return (
@@ -147,7 +136,7 @@ import Modal from "../components/ui/Modal";
                           <tr key={txn._id} className="border-b border-[#333]">
                             <td className="py-2 px-3">{txn.name}</td>
                             <td className="py-2 px-3">{txn.tableId}</td>
-                            <td className="py-2 px-3">₵{Number(txn.total).toFixed(2)}</td>
+                            <td className="py-2 px-3">₵{txn.total}</td>
                             <td className="py-2 px-3 flex gap-2">
                               <button className="text-blue-400 hover:text-blue-600">
                                 <FaEdit />
@@ -271,12 +260,12 @@ import Modal from "../components/ui/Modal";
                       <ul className="text-sm text-gray-300 space-y-1">
                         {orderItems.map((order, i) => (
                           <li key={i}>
-                            {order.qty} × {order.item} @ ₵{Number(order.unitPrice).toFixed(2)} = ₵{(order.qty * order.unitPrice).toFixed(2)}
+                            {order.qty} × {order.item} @ ₵{order.unitPrice} = ₵{order.qty * order.unitPrice}
                           </li>
                         ))}
                       </ul>
                       <p className="mt-2 font-semibold text-white">
-                        Total: ₵{total.toFixed(2)}
+                        Total: ₵{total}
                       </p>
                     </div>
 
