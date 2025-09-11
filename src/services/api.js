@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api", // your backend URL
+  baseURL: "https://www.desklearn.com/api", // your backend URL
   withCredentials: true, // include cookies if needed for auth
 });
 
