@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { register } from "../../https";
+import { register } from "../../https/index";
 import { useMutation } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 
-const Register = ({setIsRegister}) => {
+const Register = ({ setIsRegister }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,24 +12,26 @@ const Register = ({setIsRegister}) => {
     role: "",
   });
 
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle role selection
   const handleRoleSelection = (selectedRole) => {
     setFormData({ ...formData, role: selectedRole });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    registerMutation.mutate(formData);
-  };
-
+  // Mutation for registration
   const registerMutation = useMutation({
     mutationFn: (reqData) => register(reqData),
     onSuccess: (res) => {
       const { data } = res;
-      enqueueSnackbar(data.message, { variant: "success" });
+      enqueueSnackbar(data.message || "Registration successful!", {
+        variant: "success",
+      });
+
+      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -37,26 +39,35 @@ const Register = ({setIsRegister}) => {
         password: "",
         role: "",
       });
-      
+
+      // Close registration form after short delay
       setTimeout(() => {
         setIsRegister(false);
       }, 1500);
     },
     onError: (error) => {
-      const { response } = error;
-      const message = response.data.message;
+      const message =
+        error.response?.data?.message || "Registration failed. Please try again.";
       enqueueSnackbar(message, { variant: "error" });
     },
   });
 
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    registerMutation.mutate(formData);
+  };
+
   return (
-    <div>
+    <div className="max-w-md mx-auto mt-12 p-6 bg-[#1f1f1f] rounded-lg shadow-lg">
+      <h2 className="text-2xl text-white font-bold mb-6 text-center">Register</h2>
       <form onSubmit={handleSubmit}>
+        {/* Name */}
         <div>
           <label className="block text-[#ababab] mb-2 text-sm font-medium">
             Employee Name
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
             <input
               type="text"
               name="name"
@@ -68,11 +79,13 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Email */}
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
             Employee Email
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
             <input
               type="email"
               name="email"
@@ -84,13 +97,15 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Phone */}
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
             Employee Phone
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
             <input
-              type="number"
+              type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
@@ -100,11 +115,13 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Password */}
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
             Password
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
             <input
               type="password"
               name="password"
@@ -116,34 +133,35 @@ const Register = ({setIsRegister}) => {
             />
           </div>
         </div>
+
+        {/* Role Selection */}
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
             Choose your role
           </label>
-
-          <div className="flex item-center gap-3 mt-4">
-            {["Waiter", "Cashier", "Admin"].map((role) => {
-              return (
-                <button
-                  key={role}
-                  type="button"
-                  onClick={() => handleRoleSelection(role)}
-                  className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] ${
-                    formData.role === role ? "bg-indigo-700" : ""
-                  }`}
-                >
-                  {role}
-                </button>
-              );
-            })}
+          <div className="flex items-center gap-3 mt-2">
+            {["Waiter", "Cashier", "Admin"].map((role) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => handleRoleSelection(role)}
+                className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] ${
+                  formData.role === role ? "bg-indigo-700 text-white" : ""
+                }`}
+              >
+                {role}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-yellow-400 text-gray-900 font-bold"
+          className="w-full rounded-lg mt-6 py-3 text-lg bg-yellow-400 text-gray-900 font-bold hover:bg-yellow-500 transition-colors"
+          disabled={registerMutation.isLoading}
         >
-          Sign up
+          {registerMutation.isLoading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
     </div>
