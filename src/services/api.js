@@ -1,8 +1,9 @@
 // src/services/api.js
 import axios from "axios";
 
+// Create axios instance
 const api = axios.create({
-  baseURL: "https://www.desklearn.com/api/user/login", // your backend URL
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",
   withCredentials: true, // include cookies if needed for auth
 });
 
