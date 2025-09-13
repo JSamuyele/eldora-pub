@@ -81,3 +81,20 @@ body {
     font-size: 0.875rem;
   }
 }
+
+
+/* === Greetings Section === */
+.greetings-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid #333;
+}
+
+@media (max-width: 640px) {
+  .greetings-section h1 {
+    font-size: 1.25rem;
+  }
+  .greetings-section p {
+    font-size: 0.875rem;
+  }
+}
+
