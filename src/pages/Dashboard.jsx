@@ -47,9 +47,9 @@ const Dashboard = () => {
   return (
     <div className="bg-[#1f1f1f] h-[calc(100vh-7rem)] p-6 overflow-y-auto text-white">
       {/* Greetings Section */}
-      <div className="mb-6">
-        <Greetings />
-      </div>
+      <section className="greetings-section mb-6 px-2 sm:px-0">
+      <Greetings />
+      </section>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 grid-cols-4 gap-6 mb-8">
