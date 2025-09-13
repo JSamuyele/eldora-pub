@@ -14,7 +14,6 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // 🕒 Date & Time state
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -35,8 +34,7 @@ const Header = () => {
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
       dispatch(removeUser());
       navigate("/auth");
     },
@@ -50,51 +48,51 @@ const Header = () => {
   };
 
   return (
-    <header className="flex justify-between items-center py-4 px-8 bg-[#1a1a1a]">
+    <header className="flex flex-wrap justify-between items-center py-4 px-6 bg-[#1a1a1a] gap-4">
       {/* LOGO */}
       <div
         onClick={() => navigate("/dashboard")}
         className="flex items-center gap-2 cursor-pointer"
       >
-        <img src={logo} className="h-12 w-12" alt="eldora logo" />
-        <h1 className="text-lg font-semibold text-[#f5f5f5] tracking-wide">
+        <img src={logo} className="h-10 w-10 sm:h-12 sm:w-12" alt="eldora logo" />
+        <h1 className="text-base sm:text-lg font-semibold text-[#f5f5f5] tracking-wide">
           Eldora Royal Event & Pub
         </h1>
       </div>
 
       {/* SEARCH */}
-      <div className="flex items-center gap-4 bg-[#1f1f1f] rounded-[15px] px-5 py-2 w-[400px]">
+      <div className="flex items-center gap-4 bg-[#1f1f1f] rounded-[15px] px-4 py-2 w-full sm:w-[400px]">
         <FaSearch className="text-[#f5f5f5]" />
         <input
           type="text"
           placeholder="Search"
-          className="bg-[#1f1f1f] outline-none text-[#f5f5f5] w-full"
+          className="input bg-[#1f1f1f] outline-none text-[#f5f5f5] w-full"
         />
       </div>
 
-      {/* 🕒 DATE + TIME */}
-      <div className="flex flex-col items-center text-[#f5f5f5]">
-        <span className="text-sm font-medium">{formatDate(dateTime)}</span>
+      {/* DATE + TIME */}
+      <div className="flex flex-col items-center text-[#f5f5f5] text-sm sm:text-base">
+        <span className="font-medium">{formatDate(dateTime)}</span>
         <span className="text-xs text-[#ababab]">{formatTime(dateTime)}</span>
       </div>
 
-      {/* LOGGED USER DETAILS */}
-      <div className="flex items-center gap-4">
+      {/* USER DETAILS */}
+      <div className="flex items-center gap-3 flex-wrap justify-end">
         {userData.role === "Admin" && (
           <div
             onClick={() => navigate("/dashboard")}
-            className="bg-[#1f1f1f] rounded-[15px] p-3 cursor-pointer"
+            className="bg-[#1f1f1f] rounded-[15px] p-2 sm:p-3 cursor-pointer"
           >
-            <MdDashboard className="text-[#f5f5f5] text-2xl" />
+            <MdDashboard className="text-[#f5f5f5] text-xl sm:text-2xl" />
           </div>
         )}
-        <div className="bg-[#1f1f1f] rounded-[15px] p-3 cursor-pointer">
-          <FaBell className="text-[#f5f5f5] text-2xl" />
+        <div className="bg-[#1f1f1f] rounded-[15px] p-2 sm:p-3 cursor-pointer">
+          <FaBell className="text-[#f5f5f5] text-xl sm:text-2xl" />
         </div>
-        <div className="flex items-center gap-3 cursor-pointer">
-          <FaUserCircle className="text-[#f5f5f5] text-4xl" />
-          <div className="flex flex-col items-start">
-            <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
+        <div className="flex items-center gap-2 sm:gap-3 cursor-pointer">
+          <FaUserCircle className="text-[#f5f5f5] text-3xl sm:text-4xl" />
+          <div className="flex flex-col items-start text-sm sm:text-base">
+            <h1 className="font-semibold tracking-wide">
               {userData.name || "TEST USER"}
             </h1>
             <p className="text-xs text-[#ababab] font-medium">
@@ -104,7 +102,7 @@ const Header = () => {
           <IoLogOut
             onClick={handleLogout}
             className="text-[#f5f5f5] ml-2"
-            size={40}
+            size={32}
           />
         </div>
       </div>
