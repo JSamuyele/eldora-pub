@@ -1,9 +1,9 @@
 // src/https/index.js
 import axios from "axios";
 
-// ✅ Axios instance with production backend
+// ✅ Axios instance with dynamic backend URL from environment
 const api = axios.create({
-  baseURL: "https://www.desklearn.com/api", // Production backend domain
+  baseURL: import.meta.env.VITE_BACKEND_URL, // Uses Vercel env variable
   withCredentials: true,                     // Ensures cookies/session are sent
 });
 
