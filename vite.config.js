@@ -1,16 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig(({ command }) => {
   if (command === 'serve') {
-    // dev server config
     return {
       plugins: [react()],
       server: {
         proxy: {
           '/api': {
-            target: 'https://www.desklearn.com',
+            target: 'https://api.desklearn.com',
             changeOrigin: true,
             secure: false,
           },
@@ -18,9 +16,12 @@ export default defineConfig(({ command }) => {
       },
     }
   } else {
-    // production build config
     return {
       plugins: [react()],
+      base: './',
+      build: {
+        outDir: 'dist',
+      },
     }
   }
 })
