@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { FaCashRegister, FaMoneyBillWave, FaChair, FaBoxes } from "react-icons/fa";
-import Greetings from "../components/home/Greetings"; // 👈 import Greetings
-
-const buttons = [];
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  BarChart, Bar
+} from "recharts";
+import {
+  FaCashRegister, FaMoneyBillWave, FaChair, FaBoxes
+} from "react-icons/fa";
+import Greetings from "../components/home/Greetings";
 
 const Dashboard = () => {
   useEffect(() => {
     document.title = "POS | Admin Dashboard";
   }, []);
 
-  // Dummy stats
   const stats = [
     { title: "Sales Today", value: "₵1,250", icon: <FaCashRegister size={24} />, color: "bg-blue-500" },
     { title: "Total Revenue", value: "₵35,600", icon: <FaMoneyBillWave size={24} />, color: "bg-green-500" },
@@ -18,7 +20,6 @@ const Dashboard = () => {
     { title: "Low Stock Items", value: "5", icon: <FaBoxes size={24} />, color: "bg-red-500" },
   ];
 
-  // Dummy sales trend data
   const salesData = [
     { day: "Mon", sales: 400 },
     { day: "Tue", sales: 300 },
@@ -29,7 +30,6 @@ const Dashboard = () => {
     { day: "Sun", sales: 650 },
   ];
 
-  // Dummy inventory usage
   const inventoryData = [
     { item: "Beer", used: 120 },
     { item: "Whiskey", used: 80 },
@@ -37,7 +37,6 @@ const Dashboard = () => {
     { item: "Vodka", used: 40 },
   ];
 
-  // Dummy recent activity/events
   const recentEvents = [
     "Table 5 - Order #123 completed",
     "Inventory: Beer restocked (50 units)",
@@ -53,11 +52,11 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => (
           <div
             key={index}
-            className={`p-4 rounded-2xl shadow-md flex items-center justify-between ${stat.color}`}
+            className={`card p-4 rounded-2xl shadow-md flex items-center justify-between ${stat.color}`}
           >
             <div>
               <h3 className="text-lg font-semibold">{stat.title}</h3>
@@ -71,7 +70,7 @@ const Dashboard = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Sales Trend */}
-        <div className="bg-[#2a2a2a] p-4 rounded-2xl shadow-md">
+        <div className="table-responsive bg-[#2a2a2a] p-4 rounded-2xl shadow-md">
           <h3 className="text-lg font-semibold mb-4">Sales Trend (Weekly)</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={salesData}>
@@ -84,7 +83,7 @@ const Dashboard = () => {
         </div>
 
         {/* Inventory Usage */}
-        <div className="bg-[#2a2a2a] p-4 rounded-2xl shadow-md">
+        <div className="table-responsive bg-[#2a2a2a] p-4 rounded-2xl shadow-md">
           <h3 className="text-lg font-semibold mb-4">Inventory Usage</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={inventoryData}>
@@ -102,7 +101,7 @@ const Dashboard = () => {
         <h3 className="text-lg font-semibold mb-4">Recent Activity & Events</h3>
         <ul className="space-y-2">
           {recentEvents.map((event, index) => (
-            <li key={index} className="p-2 rounded-lg bg-[#3a3a3a]">
+            <li key={index} className="p-2 rounded-lg bg-[#3a3a3a] text-sm">
               {event}
             </li>
           ))}
