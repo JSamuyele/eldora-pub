@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://www.desklearn.com/api", // production backend
+  baseURL: "https://api.desklearn.com/api", // production backend
   withCredentials: true,
 });
 
