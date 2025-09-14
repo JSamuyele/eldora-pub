@@ -1,11 +1,8 @@
-// src/hooks/useInventory.js
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-
-const API_URL = "http://desklearn.com/api/inventory"; // 👈 adjust to match your backend route
+import api from "../services/api"; // ✅ uses secure Axios instance
 
 const fetchInventory = async () => {
-  const { data } = await axios.get(API_URL);
+  const { data } = await api.get("/inventory"); // ✅ HTTPS via shared baseURL
   return data; // expect an array of items
 };
 
