@@ -12,17 +12,14 @@ const Register = ({ setIsRegister }) => {
     role: "",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle role selection
   const handleRoleSelection = (selectedRole) => {
     setFormData({ ...formData, role: selectedRole });
   };
 
-  // Mutation for registration
   const registerMutation = useMutation({
     mutationFn: (reqData) => register(reqData),
     onSuccess: (res) => {
@@ -31,7 +28,6 @@ const Register = ({ setIsRegister }) => {
         variant: "success",
       });
 
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -40,7 +36,6 @@ const Register = ({ setIsRegister }) => {
         role: "",
       });
 
-      // Close registration form after short delay
       setTimeout(() => {
         setIsRegister(false);
       }, 1500);
@@ -52,118 +47,115 @@ const Register = ({ setIsRegister }) => {
     },
   });
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     registerMutation.mutate(formData);
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-6 bg-[#1f1f1f] rounded-lg shadow-lg">
-      <h2 className="text-2xl text-white font-bold mb-6 text-center">Register</h2>
-      <form onSubmit={handleSubmit}>
-        {/* Name */}
-        <div>
-          <label className="block text-[#ababab] mb-2 text-sm font-medium">
-            Employee Name
-          </label>
-          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
+    <div className="w-full max-w-sm sm:max-w-md mx-auto mt-10 px-4 sm:px-6">
+      <div className="bg-[#1f1f1f] p-6 sm:p-8 rounded-xl shadow-xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">
+          Create an Account
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Full Name
+            </label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Enter employee name"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="John Doe"
+              className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] text-white placeholder-[#777] focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-        </div>
 
-        {/* Email */}
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
-            Employee Email
-          </label>
-          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter employee email"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="john@example.com"
+              className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] text-white placeholder-[#777] focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-        </div>
 
-        {/* Phone */}
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
-            Employee Phone
-          </label>
-          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Phone Number
+            </label>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="Enter employee phone"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="+233 123 456 789"
+              className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] text-white placeholder-[#777] focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-        </div>
 
-        {/* Password */}
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
-            Password
-          </label>
-          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Password
+            </label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter password"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="••••••••"
+              className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] text-white placeholder-[#777] focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-        </div>
 
-        {/* Role Selection */}
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
-            Choose your role
-          </label>
-          <div className="flex items-center gap-3 mt-2">
-            {["Waiter", "Cashier", "Admin"].map((role) => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => handleRoleSelection(role)}
-                className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] ${
-                  formData.role === role ? "bg-indigo-700 text-white" : ""
-                }`}
-              >
-                {role}
-              </button>
-            ))}
+          {/* Role Selection */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Select Role
+            </label>
+            <div className="grid grid-cols-3 gap-3 mt-2">
+              {["Waiter", "Cashier", "Admin"].map((role) => (
+                <button
+                  key={role}
+                  type="button"
+                  onClick={() => handleRoleSelection(role)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    formData.role === role
+                      ? "bg-indigo-600 text-white"
+                      : "bg-[#2a2a2a] text-[#ababab] hover:bg-[#3a3a3a]"
+                  }`}
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-yellow-400 text-gray-900 font-bold hover:bg-yellow-500 transition-colors"
-          disabled={registerMutation.isLoading}
-        >
-          {registerMutation.isLoading ? "Signing up..." : "Sign Up"}
-        </button>
-      </form>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg bg-yellow-400 text-gray-900 font-bold text-base hover:bg-yellow-500 transition-colors"
+            disabled={registerMutation.isLoading}
+          >
+            {registerMutation.isLoading ? "Signing up..." : "Sign Up"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
