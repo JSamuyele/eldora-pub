@@ -14,20 +14,17 @@ const Login = () => {
     password: "",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Mutation for login
   const loginMutation = useMutation({
     mutationFn: (reqData) => login(reqData),
     onSuccess: (res) => {
       const { data } = res;
-      console.log("Login success:", data);
       const { _id, name, email, phone, role } = data.data;
       dispatch(setUser({ _id, name, email, phone, role }));
-      navigate("/"); // Redirect after successful login
+      navigate("/");
       enqueueSnackbar("Login successful!", { variant: "success" });
     },
     onError: (error) => {
@@ -37,61 +34,60 @@ const Login = () => {
     },
   });
 
-  // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
     loginMutation.mutate(formData);
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-6 bg-[#1f1f1f] rounded-lg shadow-lg">
-      <h2 className="text-2xl text-white font-bold mb-6 text-center">Sign In</h2>
-      <form onSubmit={handleSubmit}>
-        {/* Email */}
-        <div>
-          <label className="block text-[#ababab] mb-2 text-sm font-medium">
-            Employee Email
-          </label>
-          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
+    <div className="w-full max-w-sm sm:max-w-md mx-auto mt-10 px-4 sm:px-6">
+      <div className="bg-[#1f1f1f] p-6 sm:p-8 rounded-xl shadow-xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">
+          Welcome Back
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter employee email"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="john@example.com"
+              className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] text-white placeholder-[#777] focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-        </div>
 
-        {/* Password */}
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-4 text-sm font-medium">
-            Password
-          </label>
-          <div className="flex items-center rounded-lg p-3 bg-[#2a2a2a]">
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-[#ababab] mb-1">
+              Password
+            </label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter password"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="••••••••"
+              className="w-full px-4 py-3 rounded-lg bg-[#2a2a2a] text-white placeholder-[#777] focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-yellow-400 text-gray-900 font-bold hover:bg-yellow-500 transition-colors"
-          disabled={loginMutation.isLoading}
-        >
-          {loginMutation.isLoading ? "Signing in..." : "Sign In"}
-        </button>
-      </form>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg bg-yellow-400 text-gray-900 font-bold text-base hover:bg-yellow-500 transition-colors"
+            disabled={loginMutation.isLoading}
+          >
+            {loginMutation.isLoading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
