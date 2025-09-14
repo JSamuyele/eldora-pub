@@ -1,4 +1,3 @@
-// src/pages/Inventory.jsx
 import React, { useEffect, useState } from "react";
 import {
   FaPlus, FaFilter, FaDownload, FaCog, FaTrash, FaEdit, FaArrowLeft,
@@ -27,7 +26,6 @@ const Inventory = () => {
     document.title = "POS | Inventory";
   }, []);
 
-  // Add item
   const addMutation = useMutation({
     mutationFn: (newItem) =>
       api.post("/inventory", { ...newItem, stock: Number(newItem.stock) }),
@@ -38,7 +36,6 @@ const Inventory = () => {
     },
   });
 
-  // Edit item
   const editMutation = useMutation({
     mutationFn: (updatedItem) =>
       api.put(`/inventory/${selectedItem._id}`, {
@@ -52,7 +49,6 @@ const Inventory = () => {
     },
   });
 
-  // Delete item
   const deleteMutation = useMutation({
     mutationFn: (id) => api.delete(`/inventory/${id}`),
     onSuccess: () => queryClient.invalidateQueries(["inventory"]),
@@ -87,31 +83,30 @@ const Inventory = () => {
     </span>
   );
 
-  // 🔹 Shared input + button styles
   const inputClass =
-    "p-2 rounded bg-[#1f1f1f] border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none";
+    "input p-2 rounded bg-[#1f1f1f] border border-gray-600 text-white focus:ring-2 focus:ring-blue-500 outline-none";
   const buttonPrimary =
-    "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm";
+    "btn bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm";
 
   return (
     <div className="bg-[#1f1f1f] min-h-screen text-white p-6 overflow-y-auto">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="text-sm bg-gray-700 hover:bg-gray-800 px-3 py-2 rounded-lg flex items-center gap-2"
+            className="btn text-sm bg-gray-700 hover:bg-gray-800 px-3 py-2 rounded-lg flex items-center gap-2"
           >
             <FaArrowLeft /> Back
           </button>
           <div>
-            <h1 className="text-2xl font-semibold">📦 Inventory</h1>
-            <p className="text-[#ababab]">Track and manage your stock in real time.</p>
+            <h1 className="text-xl sm:text-2xl font-semibold">📦 Inventory</h1>
+            <p className="text-sm text-[#ababab]">Track and manage your stock in real time.</p>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setIsAddOpen(true)}
             className={`${buttonPrimary} flex items-center gap-2`}
@@ -121,19 +116,19 @@ const Inventory = () => {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="bg-gray-700 text-white border border-gray-600 px-3 py-2 rounded-lg text-sm"
+            className="input bg-gray-700 text-white border border-gray-600 px-3 py-2 rounded-lg text-sm"
           >
             <option value="All">All Categories</option>
             {[...new Set(items.map((i) => i.category))].map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
-          <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm">
+          <button className="btn flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm">
             <FaDownload /> Export
           </button>
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg text-sm"
+            className="btn flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg text-sm"
           >
             <FaCog /> Settings
           </button>
@@ -141,7 +136,7 @@ const Inventory = () => {
       </div>
 
       {/* Inventory Table */}
-      <div className="bg-[#2a2a2a] rounded-lg shadow p-4">
+      <div className="table-responsive bg-[#2a2a2a] rounded-lg shadow p-4">
         {isLoading && <p className="text-gray-400">Loading inventory...</p>}
         {isError && <p className="text-red-400">Failed to load inventory.</p>}
 
@@ -150,7 +145,7 @@ const Inventory = () => {
         )}
 
         {!isLoading && !isError && filteredItems.length > 0 && (
-          <table className="w-full text-left">
+          <table className="w-full text-left text-sm">
             <thead>
               <tr className="text-[#f5f5f5] border-b border-[#444]">
                 <th className="py-2 px-3">Item</th>
@@ -200,7 +195,7 @@ const Inventory = () => {
         )}
       </div>
 
-      {/* Add Item Modal */}
+      {/* Modals */}
       <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Add New Item">
         <form
           onSubmit={handleSubmit((data) => addMutation.mutate(data))}
@@ -247,3 +242,5 @@ const Inventory = () => {
 };
 
 export default Inventory;
+
+                                                                  
