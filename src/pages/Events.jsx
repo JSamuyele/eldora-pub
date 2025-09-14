@@ -3,7 +3,9 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery, useMutation, useQueryClient
+} from "@tanstack/react-query";
 import { FaTrash, FaPrint } from "react-icons/fa";
 import api from "../services/api";
 import AddEventTransactionModal from "../components/events/AddEventTransactionModal";
@@ -15,7 +17,9 @@ const Events = () => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedType, setSelectedType] = useState("All");
 
-  useEffect(() => { document.title = "POS | Events"; }, []);
+  useEffect(() => {
+    document.title = "POS | Events";
+  }, []);
 
   const fetchData = async (url, fallback = []) => {
     try {
@@ -52,12 +56,7 @@ const Events = () => {
 
   const handlePrint = (txn) => {
     const lines = txn.orders?.length
-      ? txn.orders
-          .map(
-            (o) =>
-              `${o.qty} × ${o.item} @ ₵${o.unitPrice} = ₵${o.qty * o.unitPrice}`
-          )
-          .join("\n")
+      ? txn.orders.map(o => `${o.qty} × ${o.item} @ ₵${o.unitPrice} = ₵${o.qty * o.unitPrice}`).join("\n")
       : `${txn.qty} × ${txn.item} @ ₵${txn.unitPrice} = ₵${txn.total}`;
     const r = `Receipt - ${txn._id}
 Event: ${txn.eventType || "—"} | Name: ${txn.eventName || "—"}
@@ -72,11 +71,7 @@ Time: ${txn.time}`;
     }
   };
 
-  // Summary calculations
-  const totalRevenue = eventTxns.reduce(
-    (s, t) => s + (Number(t.total) || 0),
-    0
-  );
+  const totalRevenue = eventTxns.reduce((s, t) => s + (Number(t.total) || 0), 0);
   const avgSpend = eventTxns.length ? totalRevenue / eventTxns.length : 0;
 
   const filteredTxns =
@@ -84,15 +79,8 @@ Time: ${txn.time}`;
       ? eventTxns
       : eventTxns.filter((t) => t.eventType === selectedType);
 
-  const groupedTxns = filteredTxns.reduce((a, t) => {
-    (a[t.eventType || "Other"] ||= []).push(t);
-    return a;
-  }, {});
-
   const topItem = (() => {
-    const allItems = eventTxns.flatMap(
-      (t) => t.orders?.map((o) => o.item) || [t.item]
-    );
+    const allItems = eventTxns.flatMap(t => t.orders?.map(o => o.item) || [t.item]);
     const freq = allItems.reduce((acc, item) => {
       acc[item] = (acc[item] || 0) + 1;
       return acc;
@@ -102,41 +90,41 @@ Time: ${txn.time}`;
 
   return (
     <div className="bg-[#1f1f1f] min-h-screen text-white p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold mb-2">🎉 Event Sales Dashboard</h1>
-      <p className="text-[#ababab] mb-4">Track and manage event-driven sales.</p>
+      <h1 className="text-xl sm:text-2xl font-semibold mb-2">🎉 Event Sales Dashboard</h1>
+      <p className="text-sm text-[#ababab] mb-4">Track and manage event-driven sales.</p>
+
       <div className="flex justify-end mb-4">
-      <button
-        onClick={() => setIsAddOpen(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow"
-      >
-        + Add Event Transaction
-      </button>
+        <button
+          onClick={() => setIsAddOpen(true)}
+          className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow"
+        >
+          + Add Event Transaction
+        </button>
       </div>
 
-
-      {/* Overview cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#2a2a2a] p-4 rounded-xl shadow">
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="card bg-[#2a2a2a] p-4 rounded-xl shadow">
           <h3 className="text-sm text-gray-400">Total Transactions</h3>
           <p className="text-xl font-semibold">{eventTxns.length}</p>
         </div>
-        <div className="bg-[#2a2a2a] p-4 rounded-xl shadow">
+        <div className="card bg-[#2a2a2a] p-4 rounded-xl shadow">
           <h3 className="text-sm text-gray-400">Total Revenue</h3>
           <p className="text-xl font-semibold">₵{totalRevenue.toFixed(2)}</p>
         </div>
-        <div className="bg-[#2a2a2a] p-4 rounded-xl shadow">
+        <div className="card bg-[#2a2a2a] p-4 rounded-xl shadow">
           <h3 className="text-sm text-gray-400">Avg Spend / Transaction</h3>
           <p className="text-xl font-semibold">₵{avgSpend.toFixed(2)}</p>
         </div>
-        <div className="bg-[#2a2a2a] p-4 rounded-xl shadow">
+        <div className="card bg-[#2a2a2a] p-4 rounded-xl shadow">
           <h3 className="text-sm text-gray-400">Top Item</h3>
           <p className="text-xl font-semibold">{topItem}</p>
         </div>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-[#2a2a2a] p-4 rounded-xl shadow">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="table-responsive bg-[#2a2a2a] p-4 rounded-xl shadow">
           <h2 className="text-lg font-semibold mb-3">Revenue by Event</h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={eventRevenue}>
@@ -148,7 +136,8 @@ Time: ${txn.time}`;
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-[#2a2a2a] p-4 rounded-xl shadow">
+
+        <div className="table-responsive bg-[#2a2a2a] p-4 rounded-xl shadow">
           <h2 className="text-lg font-semibold mb-3">Sales Breakdown</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -172,8 +161,8 @@ Time: ${txn.time}`;
         </div>
       </div>
 
-      {/* Transactions table */}
-      <div className="bg-[#2a2a2a] rounded-xl shadow p-4 overflow-x-auto mb-6">
+      {/* Transactions Table */}
+      <div className="table-responsive bg-[#2a2a2a] rounded-xl shadow p-4 mb-6">
         <h2 className="text-xl font-semibold mb-3">📑 Event Transactions</h2>
         <table className="w-full text-left text-sm border-collapse">
           <thead>
@@ -196,10 +185,8 @@ Time: ${txn.time}`;
                   <td className="py-2 px-3">
                     {t.orders?.length ? (
                       <ul className="space-y-1">
-                        {t.orders.map((o, i) => (
-                          <li key={i}>
-                            {o.qty} × {o.item} @ ₵{o.unitPrice} = ₵
-                            {o.qty * o.unitPrice}
+                        {t.orders.map((o, i) => ( <li key={i}>
+                            {o.qty} × {o.item} @ ₵{o.unitPrice} = ₵{o.qty * o.unitPrice}
                           </li>
                         ))}
                       </ul>
@@ -238,7 +225,6 @@ Time: ${txn.time}`;
       </div>
 
       {/* Add Transaction Modal */}
-
       {isAddOpen && (
         <AddEventTransactionModal
           isOpen={isAddOpen}
@@ -251,3 +237,4 @@ Time: ${txn.time}`;
 };
 
 export default Events;
+
