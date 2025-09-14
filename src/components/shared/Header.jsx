@@ -11,9 +11,7 @@
   </div>
 
   #  {/* SEARCH */}
-  # <div className="flex items-center gap-3 bg-[#1f1f1f] rounded-[12px] px-3 py-1 sm:px-5 sm:py-2 w-full sm:w-[400px]">
-    #  <FaSearch className="text-[#f5f5f5] text-sm sm:text-base" />
-    #  <input type="text" placeholder="Search" className="input bg-[#1f1f1f] outline-none text-[#f5f5f5] w-full text-sm sm:text-base" /> </div>
+
 
   {/* DATE + TIME */}
   <div className="flex flex-col items-center text-[#f5f5f5] text-xs sm:text-sm">
