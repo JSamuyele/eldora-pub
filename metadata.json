@@ -1,0 +1,5 @@
+{
+  "name": "ErnieBe Multi-Tenant POS",
+  "description": "A comprehensive Point of Sale (POS) system designed for multi-tenant environments like restaurants, pubs, and event centers. It features role-based access control for super admins, admins, managers, cashiers, and waitstaff, with dashboards tailored to each role.",
+  "requestFramePermissions": []
+}
