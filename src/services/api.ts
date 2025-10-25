@@ -5,8 +5,9 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 
+
 // Centralized API fetch function
-const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('token');
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -55,7 +56,13 @@ export const updateInventoryItem = (id: string, updatedItem: any) => apiFetch(`/
 export const deleteInventoryItem = (id: string) => apiFetch(`/inventory/${id}`, { method: 'DELETE' });
 
 // --- Sales/Transactions/Orders ---
-export const getSalesTransactions = () => apiFetch('/transactions').then(res => res.data);
+export const getSalesTransactions = (params?: { period?: '7d' | '30d' }) => {
+    let endpoint = '/transactions';
+    if (params?.period) {
+        endpoint += `?period=${params.period}`;
+    }
+    return apiFetch(endpoint).then(res => res.data);
+};
 export const createSalesTransaction = (txn: any) => apiFetch('/transactions', { method: 'POST', body: JSON.stringify(txn) });
 export const updateSalesTransaction = (id: string, updatedTxn: any) => apiFetch(`/transactions/${id}`, { method: 'PUT', body: JSON.stringify(updatedTxn) });
 export const deleteSalesTransaction = (id: string) => apiFetch(`/transactions/${id}`, { method: 'DELETE' });
@@ -81,7 +88,7 @@ export const updateEvent = (id: string, data: any) => apiFetch(`/events/${id}`, 
 export const deleteEvent = (id: string) => apiFetch(`/events/${id}`, { method: 'DELETE' });
 export const getEventTransactions = () => getSalesTransactions().then(txns => txns.filter((t: any) => t.source === 'Event Sales')); // Mocked for now as backend doesn't differentiate yet
 // Fix: The mocked function was returning { data: [...] } instead of just [...], causing a type mismatch in useQuery. Added .then(res => res.data) for consistency.
-export const getEventRevenue = () => Promise.resolve({ data: [{ name: 'Wedding', value: 5000 }, { name: 'Corporate', value: 8000 }] }).then(res => res.data); // Mocked for chart
+export const getEventRevenue = () => apiFetch('/dashboard/events/revenue').then(res => res.data);
 
 // --- Super Admin ---
 export const fetchAllBusinesses = () => apiFetch('/businesses').then(res => res.data);

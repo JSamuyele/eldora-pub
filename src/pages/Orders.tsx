@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { FaPlus, FaEdit, FaArrowLeft, FaMoneyBillWave, FaTrash, FaMobileAlt } from "react-icons/fa";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -26,7 +26,7 @@ type FormInputs = { name: string; tableId: string; orders: OrderItem[] };
 type PhonePaymentInputs = { phone: string };
 type PaymentInputs = { paymentMethod: 'Cash' | 'Card' | 'Mobile' };
 
-const OrderCard: React.FC<{ order: Order; onEdit: (order: Order) => void; onPay: (order: Order) => void; onPayByPhone: (order: Order) => void; canPay: boolean; }> = ({ order, onEdit, onPay, onPayByPhone, canPay }) => (
+const OrderCard: React.FC<{ order: Order; onEdit: (order: Order) => void; onPayByPhone: (order: Order) => void; onPayByCash: (order: Order) => void; canPay: boolean; }> = ({ order, onEdit, onPayByPhone, onPayByCash, canPay }) => (
     <div className="bg-[#2b2b2b] p-4 rounded-lg shadow flex flex-col justify-between">
         <div>
             <div className="flex justify-between items-start mb-2">
@@ -45,22 +45,20 @@ const OrderCard: React.FC<{ order: Order; onEdit: (order: Order) => void; onPay:
             </ul>
         </div>
         <div>
-            <p className="text-xl font-bold text-right mb-3">GHS {order.total.toFixed(2)}</p>
-            <div className="grid grid-cols-2 gap-2">
+            <p className="text-xl font-bold text-right mb-3">GHS {(order.total || 0).toFixed(2)}</p>
+            <div className="grid grid-cols-3 gap-2">
                 <button onClick={() => onEdit(order)} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm" title="Edit Order">
                     <FaEdit />
                 </button> 
                 {canPay && (
-                    <button onClick={() => onPayByPhone(order)} className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm" title="Pay by Phone">
-                        <FaMobileAlt />
-                    </button>
-                )}
-            </div>
-            <div className="mt-2">
-                {canPay && (
-                    <button onClick={() => onPay(order)} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm">
-                        <FaMoneyBillWave /> Settle Payment
-                    </button>
+                    <>
+                        <button onClick={() => onPayByCash(order)} className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm" title="Pay by Cash">
+                            <FaMoneyBillWave />
+                        </button>
+                        <button onClick={() => onPayByPhone(order)} className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm" title="Pay by Phone">
+                            <FaMobileAlt />
+                        </button>
+                    </>
                 )}
             </div>
         </div>
@@ -76,8 +74,9 @@ const Orders: React.FC = () => {
     const [isOrderModalOpen, setOrderModalOpen] = useState(false);
     const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
     const [isPhonePaymentModalOpen, setPhonePaymentModalOpen] = useState(false);
-    const [isConfirmPaymentOpen, setConfirmPaymentOpen] = useState(false);
+    
     const [isMomoPaymentModalOpen, setMomoPaymentModalOpen] = useState(false);
+    const [isCashPaymentModalOpen, setCashPaymentModalOpen] = useState(false);
     const [momoPaymentStatus, setMomoPaymentStatus] = useState<'IDLE' | 'PENDING' | 'SUCCESS' | 'FAILED'>('IDLE');
     const [momoTransactionId, setMomoTransactionId] = useState<string | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -86,6 +85,7 @@ const Orders: React.FC = () => {
     const { register, handleSubmit, reset, setValue } = useForm<FormInputs>();
     const { register: registerPhonePayment, handleSubmit: handlePhonePaymentSubmit, reset: resetPhonePayment } = useForm<PhonePaymentInputs>();
     const { register: registerPayment, handleSubmit: handlePaymentSubmit } = useForm<PaymentInputs>();
+    const { register: registerCashPayment, handleSubmit: handleCashPaymentSubmit, reset: resetCashPayment, watch: watchCashPayment } = useForm<{ cashReceived: number }>();
 
     // --- DATA FETCHING ---
     const { data: allOrders = [] } = useQuery<Order[]>({
@@ -116,7 +116,8 @@ const Orders: React.FC = () => {
             setOrderModalOpen(false);
             setPaymentModalOpen(false);
             setPhonePaymentModalOpen(false);
-            setConfirmPaymentOpen(false);
+            setCashPaymentModalOpen(false);
+            setMomoPaymentModalOpen(false);
             setSelectedOrder(null);
         },
         onError: (err: any) => enqueueSnackbar(err?.response?.data?.message || "An error occurred", { variant: 'error' }),
@@ -161,7 +162,9 @@ const Orders: React.FC = () => {
         if (paymentData) {
             if (paymentData.status === 'SUCCESS') {
                 setMomoPaymentStatus('SUCCESS');
-                paymentMutation.mutate({ paymentMethod: 'Mobile' });
+                setTimeout(() => {
+                    paymentMutation.mutate({ paymentMethod: 'Mobile' });
+                }, 2000);
             } else if (paymentData.status === 'FAILED') {
                 setMomoPaymentStatus('FAILED');
             }
@@ -184,40 +187,42 @@ const Orders: React.FC = () => {
         setOrderModalOpen(true);
     };
 
-    const handlePaymentConfirmation = (order: Order) => {
-        setSelectedOrder(order);
-        setConfirmPaymentOpen(true);
-    };
-    
     const openPhonePaymentModal = (order: Order) => {
         setSelectedOrder(order);
         resetPhonePayment({ phone: '' });
         setPhonePaymentModalOpen(true);
     };
 
-    const proceedToPayment = () => {
-        setConfirmPaymentOpen(false);
-        setPaymentModalOpen(true);
+
+
+    const openCashPaymentModal = (order: Order) => {
+        setSelectedOrder(order);
+        resetCashPayment({ cashReceived: order.total });
+        setCashPaymentModalOpen(true);
     };
 
-const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
-    // Filter out invalid items
-    const filteredOrders = orderItems
-        .filter(o => o.item && o.qty > 0);
+    const onCashPaymentSubmit: SubmitHandler<{ cashReceived: number }> = () => {
+        paymentMutation.mutate({ paymentMethod: 'Cash' });
+    };
 
-    // If no valid items, show error and abort
+    const cashReceived = watchCashPayment('cashReceived', selectedOrder?.total || 0);
+    const changeDue = cashReceived - (selectedOrder?.total || 0);
+
+const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
+    const filteredOrders = orderItems.filter(o => o.item && o.qty > 0);
     if (filteredOrders.length === 0) {
         enqueueSnackbar("Please add at least one valid order item.", { variant: "error" });
         return;
     }
     
+    const total = filteredOrders.reduce((sum, o) => sum + (o.qty || 0) * (o.unitPrice || 0), 0);
+
     const payload = {
         ...data,
         orders: filteredOrders.map(o => ({ item: o.item, qty: o.qty, unitPrice: o.unitPrice })),
         total,
         source: "Bar Sales",
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        // Add status when creating a new order
         ...(!selectedOrder && { status: 'Open' }),
     };
 
@@ -274,7 +279,7 @@ const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {openOrders.length > 0 ? openOrders.map((order) => (
-                    <OrderCard key={order._id} order={order} onEdit={openEditModal} onPay={handlePaymentConfirmation} onPayByPhone={openPhonePaymentModal} canPay={canProcessPayment}/>
+                    <OrderCard key={order._id} order={order} onEdit={openEditModal} onPayByCash={openCashPaymentModal} onPayByPhone={openPhonePaymentModal} canPay={canProcessPayment}/>
                 )) : <p className="text-gray-400 col-span-full text-center py-8">No open orders.</p>}
             </div>
 
@@ -307,7 +312,7 @@ const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
                          <button type="button" onClick={addItemRow} className="text-yellow-400 text-sm font-semibold mt-2">+ Add Item</button>
                     </div>
                     <div className="pt-2 border-t border-gray-700 flex justify-between items-center">
-                        {selectedOrder && (
+                        {selectedOrder && role === 'admin' && (
                              <button type="button" onClick={() => deleteMutation.mutate(selectedOrder._id)} className="text-red-500 font-semibold">Cancel Order</button>
                         )}
                         <h3 className="text-lg font-bold text-right ml-auto">Total: GHS {total.toFixed(2)}</h3>
@@ -318,29 +323,7 @@ const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
                 </form>
             </Modal>
 
-            {/* Payment Confirmation Modal */}
-            <Modal isOpen={isConfirmPaymentOpen} onClose={() => setConfirmPaymentOpen(false)} title="Confirm Payment">
-                <div className="text-center">
-                    <p className="text-lg text-gray-300 mb-6">
-                        Are you sure you want to process the payment for{' '}
-                        <span className="font-bold text-yellow-400">{selectedOrder?.tableId || selectedOrder?.name}</span>?
-                    </p>
-                    <div className="flex justify-center gap-4">
-                        <button
-                            onClick={() => setConfirmPaymentOpen(false)}
-                            className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 text-white font-semibold transition"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={proceedToPayment}
-                            className="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-semibold transition"
-                        >
-                            Proceed to Payment
-                        </button>
-                    </div>
-                </div>
-            </Modal>
+
 
             {/* Pay by Phone Modal */}
             <Modal isOpen={isPhonePaymentModalOpen} onClose={() => setPhonePaymentModalOpen(false)} title={`Request Payment for ${selectedOrder?.tableId}`}>
@@ -359,7 +342,7 @@ const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
                 <form onSubmit={handlePaymentSubmit(onPaymentSubmit)}>
                     <div className="text-center my-4">
                         <p className="text-gray-400">Total Amount</p>
-                        <p className="text-4xl font-bold text-yellow-400">GHS {selectedOrder?.total.toFixed(2)}</p>
+                        <p className="text-4xl font-bold text-yellow-400">GHS {(selectedOrder?.total || 0).toFixed(2)}</p>
                     </div>
                     <div>
                         <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-400 mb-1">Payment Method</label>
@@ -369,6 +352,29 @@ const onOrderSubmit: SubmitHandler<FormInputs> = (data) => {
                             <option value="Mobile">Mobile Money</option>
                         </select>
                     </div>
+                    <button type="submit" disabled={paymentMutation.isPending} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition disabled:bg-gray-600">
+                        {paymentMutation.isPending ? 'Processing...' : 'Confirm Payment'}
+                    </button>
+                </form>
+            </Modal>
+
+            {/* Pay by Cash Modal */}
+            <Modal isOpen={isCashPaymentModalOpen} onClose={() => setCashPaymentModalOpen(false)} title={`Pay by Cash for ${selectedOrder?.tableId}`}>
+                <form onSubmit={handleCashPaymentSubmit(onCashPaymentSubmit)} className="space-y-4">
+                    <div className="text-center my-4">
+                        <p className="text-gray-400">Total Amount</p>
+                        <p className="text-4xl font-bold text-yellow-400">GHS {(selectedOrder?.total || 0).toFixed(2)}</p>
+                    </div>
+                    <div>
+                        <label htmlFor="cashReceived" className="block text-sm font-medium text-gray-400 mb-1">Cash Received</label>
+                        <input id="cashReceived" type="number" {...registerCashPayment("cashReceived", { required: true, valueAsNumber: true, min: selectedOrder?.total || 0 })} placeholder="Amount" className={inputClass} />
+                    </div>
+                    {changeDue > 0 && (
+                        <div className="text-center my-4">
+                            <p className="text-gray-400">Change Due</p>
+                            <p className="text-2xl font-bold text-green-400">GHS {changeDue.toFixed(2)}</p>
+                        </div>
+                    )}
                     <button type="submit" disabled={paymentMutation.isPending} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition disabled:bg-gray-600">
                         {paymentMutation.isPending ? 'Processing...' : 'Confirm Payment'}
                     </button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { FaSearch, FaUserCircle, FaBell, FaChartLine } from 'react-icons/fa';
+import { FaSearch, FaUserCircle, FaBell, FaChartLine, FaCog, FaCalendarAlt, FaClipboardList } from 'react-icons/fa';
 import { IoLogOut, IoPerson } from 'react-icons/io5';
 import { MdDashboard } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import { removeUser } from '../../redux/userSlice';
 import { logout, getNotifications } from '../../services/api';
 import { RootState } from '../../redux/store';
 import { UserRole } from '../../types';
+import logo from '../../assets/images/logo.png';
 
 type Notification = {
   _id: string;
@@ -35,6 +36,7 @@ const Header: React.FC = () => {
     queryKey: ['notifications'],
     queryFn: getNotifications,
     staleTime: 60000, // 1 minute
+    enabled: !!localStorage.getItem('token'), // Only fetch if token exists
   });
 
   useEffect(() => {
@@ -93,11 +95,14 @@ const Header: React.FC = () => {
   const userRole = userData.role as UserRole;
   const canSeeDashboard = [UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.MANAGER].includes(userRole);
   const canSeeSales = [UserRole.ADMIN, UserRole.MANAGER, UserRole.CASHIER].includes(userRole);
+  const canManageEvents = [UserRole.ADMIN, UserRole.MANAGER].includes(userRole);
+  const canManageOrders = [UserRole.ADMIN, UserRole.MANAGER].includes(userRole);
+  const isSuperAdmin = userRole === UserRole.SUPERADMIN;
 
   return (
     <header className="flex justify-between items-center py-4 px-8 bg-[#0c021c] flex-shrink-0">
       <div onClick={() => navigate('/')} className="flex items-center gap-3 cursor-pointer">
-        <img src="https://picsum.photos/48" className="h-12 w-12 rounded-full border-2 border-yellow-400" alt="Logo" />
+        <img src={logo} className="h-12 w-12 rounded-full border-2 border-yellow-400" alt="Logo" />
         <h1 className="text-lg font-semibold text-[#f5f5f5] tracking-wide">Eldora POS</h1>
       </div>
 
@@ -117,9 +122,24 @@ const Header: React.FC = () => {
             <MdDashboard className="text-[#f5f5f5] text-2xl group-hover:text-black" />
           </div>
         )}
+        {isSuperAdmin && (
+          <div onClick={() => navigate('/superadmin/settings')} title="Settings" className="bg-[#1f1f1f] rounded-full p-3 cursor-pointer hover:bg-yellow-400 group">
+            <FaCog className="text-[#f5f5f5] text-2xl group-hover:text-black" />
+          </div>
+        )}
         {canSeeSales && (
             <div onClick={() => navigate('/sales')} title="Sales" className="bg-[#1f1f1f] rounded-full p-3 cursor-pointer hover:bg-yellow-400 group">
                 <FaChartLine className="text-[#f5f5f5] text-2xl group-hover:text-black" />
+            </div>
+        )}
+        {canManageEvents && (
+            <div onClick={() => navigate('/events')} title="Events" className="bg-[#1f1f1f] rounded-full p-3 cursor-pointer hover:bg-yellow-400 group">
+                <FaCalendarAlt className="text-[#f5f5f5] text-2xl group-hover:text-black" />
+            </div>
+        )}
+        {canManageOrders && (
+            <div onClick={() => navigate('/orders')} title="Orders" className="bg-[#1f1f1f] rounded-full p-3 cursor-pointer hover:bg-yellow-400 group">
+                <FaClipboardList className="text-[#f5f5f5] text-2xl group-hover:text-black" />
             </div>
         )}
         <div className="relative" ref={notificationsRef}>

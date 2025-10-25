@@ -52,14 +52,16 @@ const Sales: React.FC = () => {
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const { register, handleSubmit, reset } = useForm<FormInputs>();
     const [orderItems, setOrderItems] = useState<OrderItem[]>([{ item: '', qty: 1, unitPrice: 0 }]);
+    const [period, setPeriod] = useState('7d'); // Default to 7 days
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         document.title = "POS | Sales";
     }, []);
 
     const { data: transactions = [] } = useQuery<Transaction[]>({
-        queryKey: ["sales"],
-        queryFn: getSalesTransactions,
+        queryKey: ["sales", period],
+        queryFn: () => getSalesTransactions({ period }),
     });
     
     const { data: inventoryItems = [] } = useQuery<InventoryItem[]>({
@@ -74,17 +76,18 @@ const Sales: React.FC = () => {
             dailySales[date] = (dailySales[date] || 0) + txn.total;
         });
 
-        const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const numDays = period === '30d' ? 30 : 7;
+        const lastXDays = Array.from({ length: numDays }, (_, i) => {
             const d = new Date();
             d.setDate(d.getDate() - i);
             return d.toISOString().split('T')[0];
         }).reverse();
     
-        return last7Days.map(dateStr => ({
+        return lastXDays.map(dateStr => ({
             name: new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
             sales: dailySales[dateStr] || 0,
         }));
-    }, [transactions]);
+    }, [transactions, period]);
 
     const topItemsChartData = useMemo(() => {
         const itemCounts: { [key: string]: number } = {};
@@ -303,7 +306,10 @@ const Sales: React.FC = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div className="bg-[#2b2b2b] p-4 rounded-lg">
-                    <h3 className="mb-2 font-semibold">Last 7 Days Sales</h3>
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold">{`Last ${period === '30d' ? 30 : 7} Days Sales`}</h3>
+                        <button onClick={() => setIsModalOpen(true)} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Change Period</button>
+                    </div>
                     <ResponsiveContainer width="100%" height={200}>
                         <LineChart data={salesChartData}>
                             <XAxis dataKey="name" stroke="#888" fontSize={12} />
@@ -327,6 +333,18 @@ const Sales: React.FC = () => {
                     </ResponsiveContainer>
                 </div>
             </div>
+
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-30">
+                    <div className="bg-[#2b2b2b] p-5 rounded-xl">
+                        <h3 className="text-lg font-semibold mb-4">Select a Period</h3>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => { setPeriod('7d'); setIsModalOpen(false); }} className={`px-3 py-1 text-sm rounded-full ${period === '7d' ? 'bg-yellow-400 text-black' : 'bg-gray-700'} hover:bg-yellow-400 hover:text-black transition`}>Last 7 Days</button>
+                            <button onClick={() => { setPeriod('30d'); setIsModalOpen(false); }} className={`px-3 py-1 text-sm rounded-full ${period === '30d' ? 'bg-yellow-400 text-black' : 'bg-gray-700'} hover:bg-yellow-400 hover:text-black transition`}>Last 30 Days</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="bg-[#2b2b2b] rounded-lg shadow p-4 overflow-x-auto">
                 <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
@@ -359,7 +377,18 @@ const Sales: React.FC = () => {
                                     <button onClick={() => openEditModal(txn)} className="text-blue-400 hover:text-blue-300" title="Edit"><FaEdit /></button>
                                     <button onClick={() => printReceipt(txn)} title="Print Receipt" className="text-green-400 hover:text-green-300"><FaPrint /></button>
                                     {role === 'admin' && (
-                                        <button onClick={() => handleDeleteTransaction(txn._id)} className="text-red-500 hover:text-red-400" title="Delete"><FaTrash /></button>
+                                        <button 
+                                            onClick={() => handleDeleteTransaction(txn._id)} 
+                                            className="text-red-500 hover:text-red-400 disabled:text-gray-600 disabled:cursor-not-allowed" 
+                                            title={
+                                                txn.status === 'Paid' ? 'Cannot delete a paid transaction' :
+                                                txn.status === 'Cancelled' ? 'Transaction is already cancelled' :
+                                                'Delete'
+                                            }
+                                            disabled={txn.status === 'Paid' || txn.status === 'Cancelled'}
+                                        >
+                                            <FaTrash />
+                                        </button>
                                     )}
                                 </td>
                             </tr>

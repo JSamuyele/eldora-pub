@@ -77,10 +77,24 @@ const Events: React.FC = () => {
   });
   
   const handleAddSubmit: SubmitHandler<FormInputs> = (data) => {
+    if (isNaN(data.qty) || isNaN(data.unitPrice)) {
+        enqueueSnackbar("Quantity and Unit Price must be valid numbers.", { variant: "error" });
+        return;
+    }
+
+    const total = data.qty * data.unitPrice;
     const payload = {
-        ...data,
-        total: data.qty * data.unitPrice,
+        name: data.eventName || data.eventType,
+        orders: [{
+            item: data.item,
+            qty: data.qty,
+            unitPrice: data.unitPrice
+        }],
+        total: total,
         source: "Event Sales",
+        eventName: data.eventName,
+        eventType: data.eventType,
+        payment: data.payment,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     addMutation.mutate(payload);

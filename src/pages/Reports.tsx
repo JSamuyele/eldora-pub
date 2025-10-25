@@ -31,6 +31,7 @@ const Reports: React.FC = () => {
         from: new Date().toISOString().split('T')[0],
         to: new Date().toISOString().split('T')[0],
     });
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const setPresetRange = (preset: 'today' | '7d' | '30d') => {
         const to = new Date();
@@ -44,6 +45,7 @@ const Reports: React.FC = () => {
             from: from.toISOString().split('T')[0],
             to: to.toISOString().split('T')[0],
         });
+        setIsModalOpen(false); // Close modal after selection
     };
 
     const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
@@ -120,15 +122,26 @@ const Reports: React.FC = () => {
 
             <div className="no-print bg-[#2b2b2b] p-4 rounded-lg mb-6 flex items-center gap-4 flex-wrap">
                 <span className="font-semibold">Date Range:</span>
-                <button onClick={() => setPresetRange('today')} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Today</button>
-                <button onClick={() => setPresetRange('7d')} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Last 7 Days</button>
-                <button onClick={() => setPresetRange('30d')} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Last 30 Days</button>
+                <button onClick={() => setIsModalOpen(true)} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Select Period</button>
                 <div className="flex items-center gap-2">
                     <input type="date" value={dateRange.from} onChange={e => setDateRange(prev => ({ ...prev, from: e.target.value }))} className="bg-[#1f1f1f] p-1 rounded-md text-sm" />
                     <span>to</span>
                     <input type="date" value={dateRange.to} onChange={e => setDateRange(prev => ({ ...prev, to: e.target.value }))} className="bg-[#1f1f1f] p-1 rounded-md text-sm" />
                 </div>
             </div>
+
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-30">
+                    <div className="bg-[#2b2b2b] p-5 rounded-xl">
+                        <h3 className="text-lg font-semibold mb-4">Select a Period</h3>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setPresetRange('today')} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Today</button>
+                            <button onClick={() => setPresetRange('7d')} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Last 7 Days</button>
+                            <button onClick={() => setPresetRange('30d')} className="px-3 py-1 text-sm rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black transition">Last 30 Days</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div id="print-section" ref={reportContentRef}>
                 <div className="print-header hidden p-4 border-b border-gray-600 mb-4">

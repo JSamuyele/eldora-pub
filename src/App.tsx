@@ -24,6 +24,9 @@ import NotFound from './pages/NotFound';
 import FullScreenLoader from './components/shared/FullScreenLoader';
 import EventBooking from './pages/EventBooking';
 import Reports from './pages/Reports';
+import BusinessSettings from './pages/admin/BusinessSettings';
+
+import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
 
 const App: React.FC = () => {
   const isLoading = useLoadUser();
@@ -61,11 +64,13 @@ const App: React.FC = () => {
         <Route path="/staff" element={<ProtectedRoute roles={['admin', 'manager']}><StaffManagement /></ProtectedRoute>} />
         <Route path="/event-booking" element={<ProtectedRoute roles={['admin', 'manager']}><EventBooking /></ProtectedRoute>} />
         <Route path="/reports" element={<ProtectedRoute roles={['admin', 'manager']}><Reports /></ProtectedRoute>} />
+        <Route path="/admin/business-settings" element={<ProtectedRoute roles={['admin', 'manager']}><BusinessSettings /></ProtectedRoute>} />
 
 
         {/* Super Admin Routes */}
         <Route path="/superadmin/users" element={<ProtectedRoute roles={['superadmin']}><UserManagement /></ProtectedRoute>} />
         <Route path="/superadmin/businesses" element={<ProtectedRoute roles={['superadmin']}><BusinessManagement /></ProtectedRoute>} />
+        <Route path="/superadmin/settings" element={<ProtectedRoute roles={['superadmin']}><SuperAdminSettings /></ProtectedRoute>} />
       </Route>
       
       <Route path="/unauthorized" element={<Unauthorized />} />
