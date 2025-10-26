@@ -1,4 +1,4 @@
-// pos-frontend/src/index.tsx
+// pos-frontend/src/main.tsx
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
